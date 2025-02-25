@@ -81,6 +81,16 @@ jobs:
             chmod +x ngrok
             sudo mv ngrok /usr/local/bin
 
+      - name: Authenticate ngrok
+        run: ngrok authtoken ${{ secrets.cr_2tYOIGuZ3IEmnMLdLr3jl9FTyRE }} 
+
+      - name: Start ngrok on port 5001
+        run: |
+          ngrok http 5001 > ngrok.log &
+          sleep 10 # Allow some time for ngrok to start
+          tail -n 10 ngrok.log
+
+
 
       # Step 9: Expose app1 with ngrok
       - name: Expose app1 on port 5001 using ngrok
