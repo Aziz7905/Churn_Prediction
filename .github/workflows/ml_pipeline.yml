@@ -74,11 +74,13 @@ jobs:
           docker exec -d ml_app uvicorn app1:app --host 0.0.0.0 --port 5001
           sleep 5
 
-      # Step 8: Install ngrok
       - name: Install ngrok
         run: |
-          curl -s https://ngrok.com/download | tar xz
-          sudo mv ngrok /usr/local/bin
+            curl -LO https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip
+            unzip ngrok-stable-linux-amd64.zip
+            chmod +x ngrok
+            sudo mv ngrok /usr/local/bin
+
 
       # Step 9: Expose app1 with ngrok
       - name: Expose app1 on port 5001 using ngrok
