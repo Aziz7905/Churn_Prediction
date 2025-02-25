@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Churn Predictor</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Customer Churn Prediction</h1>
+        <form id="predictionForm">
+            <div class="form-grid">
+                <!-- Personal Info -->
+                <div class="form-section">
+                    <h2>Customer Information</h2>
+                    <div class="form-group">
+                        <label>State:</label>
+                        <input type="text" name="State" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Account Length (months):</label>
+                        <input type="number" name="Account length" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Area Code:</label>
+                        <input type="number" name="Area code" required>
+                    </div>
+                </div>
+
+                <!-- Plan Information -->
+                <div class="form-section">
+                    <h2>Plan Details</h2>
+                    <div class="form-group">
+                        <label>International Plan:</label>
+                        <select name="International plan" required>
+                            <option value="no">No</option>
+                            <option value="yes">Yes</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Voice Mail Plan:</label>
+                        <select name="Voice mail plan" required>
+                            <option value="no">No</option>
+                            <option value="yes">Yes</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Number of Voicemails:</label>
+                        <input type="number" name="Number vmail messages" required>
+                    </div>
+                </div>
+
+                <!-- Usage Details -->
+                <div class="form-section">
+                    <h2>Service Usage</h2>
+                    <div class="form-group">
+                        <label>Day Minutes:</label>
+                        <input type="number" step="0.1" name="Total day minutes" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Day Charge:</label>
+                        <input type="number" step="0.01" name="Total day charge" required>
+                    </div>
+                    <!-- Add more usage fields following the same pattern -->
+                </div>
+            </div>
+
+            <button type="submit">Predict Churn</button>
+        </form>
+
+        <div id="result" class="hidden">
+            <h2>Prediction Result</h2>
+            <p id="predictionText"></p>
+        </div>
+
+        <div id="loading" class="hidden">
+            <div class="loader"></div>
+            <p>Analyzing data...</p>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('predictionForm');
+        const resultDiv = document.getElementById('result');
+        const loadingDiv = document.getElementById('loading');
+        const predictionText = document.getElementById('predictionText');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            loadingDiv.classList.remove('hidden');
+            resultDiv.classList.add('hidden');
+
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+
+            try {
+                const response = await fetch('http://localhost:8000/predict/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (!response.ok) throw new Error('Prediction failed');
+                
+                const result = await response.json();
+                predictionText.textContent = result.churn_prediction 
+                    ? "High Churn Risk 🚨" 
+                    : "Low Churn Risk ✅";
+                
+                resultDiv.classList.remove('hidden');
+            } catch (error) {
+                predictionText.textContent = `Error: ${error.message}`;
+                resultDiv.classList.remove('hidden');
+            } finally {
+                loadingDiv.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
