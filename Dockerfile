@@ -1,17 +1,22 @@
 FROM python:3.11
 
-# Définir le répertoire de travail
+# Set working directory
 WORKDIR /app
 
-# Copier les fichiers du projet dans l'image Docker
+# Copy project files into the container
 COPY . /app
 
-# Installer les dépendances
+# Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Exposer le port utilisé par FastAPI
-EXPOSE 8000
+# Expose the ports for the FastAPI apps and MLflow
+EXPOSE 8000 8001 5002
 
-# Lancer l'application FastAPI en prenant en compte la structure du projet
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
-
+# Run both FastAPI applications and MLflow server when the container starts
+CMD /bin/sh -c "
+  mkdir -p mlruns &&
+  uvicorn app:app --host 0.0.0.0 --port 8000 & 
+  uvicorn app1:app --host 0.0.0.0 --port 8001 & 
+  mlflow server --backend-store-uri sqlite:///mlflow.db --default-artifact-root file://$(pwd)/mlruns --host 0.0.0.0 --port 5002 & 
+  wait
+"
