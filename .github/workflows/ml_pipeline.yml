@@ -41,7 +41,7 @@ jobs:
       - name: Create MLruns Directory
         run: mkdir -p mlruns
 
-      # Step 5: Set up Docker
+      # Step 5: Set up Docker Buildx
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -53,20 +53,41 @@ jobs:
         run: |
           docker run -d --name ml_app -p 5000:5000 -p 5001:5001 -p 5002:5002 my-ml-app
 
-      # Step 6: Start MLflow Server and FastAPI Apps in Parallel
-      - name: Start MLflow Server and FastAPI Apps
+      # Step 6: Start MLflow Server
+      - name: Start MLflow Server with SQLite Backend
         run: |
-          docker exec -d ml_app sh -c "
-            mlflow server \
-              --backend-store-uri sqlite:///mlflow.db \
-              --default-artifact-root file://$(pwd)/mlruns \
-              --host 0.0.0.0 \
-              --port 5002 & \
-            uvicorn app:app --host 0.0.0.0 --port 5000 & \
-            uvicorn app1:app --host 0.0.0.0 --port 5001"
+          docker exec -d ml_app mlflow server \
+            --backend-store-uri sqlite:///mlflow.db \
+            --default-artifact-root file://$(pwd)/mlruns \
+            --host 0.0.0.0 \
+            --port 5002
           sleep 10
 
-      # Step 7: Upload MLflow Logs
+      # Step 7: Start FastAPI apps (app.py and app1.py)
+      - name: Start app.py on port 5000
+        run: |
+          docker exec -d ml_app uvicorn app:app --host 0.0.0.0 --port 5000
+          sleep 5
+
+      - name: Start app1.py on port 5001
+        run: |
+          docker exec -d ml_app uvicorn app1:app --host 0.0.0.0 --port 5001
+          sleep 5
+
+      # Step 8: Install ngrok
+      - name: Install ngrok
+        run: |
+          curl -s https://ngrok.com/download | tar xz
+          sudo mv ngrok /usr/local/bin
+
+      # Step 9: Expose app1 with ngrok
+      - name: Expose app1 on port 5001 using ngrok
+        run: |
+          ngrok http 5001 > ngrok.log &
+          sleep 10
+          tail -f ngrok.log
+
+      # Step 10: Upload MLflow Logs
       - name: Upload MLflow Logs
         uses: actions/upload-artifact@v4
         with:
