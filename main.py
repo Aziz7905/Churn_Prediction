@@ -8,15 +8,16 @@ from mlflow.tracking import MlflowClient
 
 # Ensure a local directory for MLflow artifacts exists
 os.makedirs("mlruns", exist_ok=True)
+artifact_location = os.path.abspath("mlruns")
 
-# Configure MLflow to use SQLite as the tracking store and set up the experiment
-mlflow.set_tracking_uri("sqlite:///mlflow.db")
+# Set MLflow tracking URI to use a file-based store in the mlruns directory
+mlflow.set_tracking_uri("file://" + artifact_location)
+
+# Configure experiment (this will create a new experiment if one doesn't exist)
 experiment_name = "Churn_Prediction"
 client = MlflowClient()
 experiment = client.get_experiment_by_name(experiment_name)
 if experiment is None:
-    # Create a new experiment with a local artifact location
-    artifact_location = os.path.abspath("mlruns")
     experiment_id = mlflow.create_experiment(experiment_name, artifact_location=artifact_location)
 else:
     experiment_id = experiment.experiment_id
@@ -77,8 +78,8 @@ def main():
             mlflow.log_metric("accuracy", acc)
             mlflow.log_metric("auc", auc)
             
-            # Log the model with an input_example to help MLflow infer the signature
-            input_example = X_train.iloc[0:1].to_dict(orient="list")
+            # Provide a one-row DataFrame as the input example
+            input_example = X_train.iloc[0:1]
             mlflow.sklearn.log_model(model, "model", input_example=input_example)
             
             # Save and log the classification report as an artifact
@@ -100,7 +101,7 @@ def main():
         print("Model loaded successfully!")
         
         print("Preparing test data...")
-        # Here, prepare_data is assumed to handle None for train_data when a scaler is provided
+        # Assumes prepare_data can handle None for train_data when a scaler is provided
         _, df_test, _ = prepare_data(None, args.test_data, scaler)
         
         X_test = df_test.drop(columns=['Churn'])
