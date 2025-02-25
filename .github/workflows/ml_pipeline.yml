@@ -49,11 +49,28 @@ jobs:
         run: |
           docker build -t my-ml-app .
 
+      # Step 6: Login to Docker Hub
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.Aziz7905 }}
+          password: ${{ secrets.222JMT4622 }}
+
+      # Step 7: Tag Docker Image
+      - name: Tag Docker Image
+        run: |
+          docker tag my-ml-app ${{ secrets.Aziz7905 }}/my-ml-app:latest
+
+      # Step 8: Push Docker Image to Docker Hub
+      - name: Push Docker Image
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/my-ml-app:latest
+
       - name: Run Docker Container
         run: |
           docker run -d --name ml_app -p 5000:5000 -p 5001:5001 -p 5002:5002 my-ml-app
 
-      # Step 6: Start MLflow Server
+      # Step 9: Start MLflow Server
       - name: Start MLflow Server with SQLite Backend
         run: |
           docker exec -d ml_app mlflow server \
@@ -63,7 +80,7 @@ jobs:
             --port 5002
           sleep 10
 
-      # Step 7: Start FastAPI apps (app.py and app1.py)
+      # Step 10: Start FastAPI apps (app.py and app1.py)
       - name: Start app.py on port 5000
         run: |
           docker exec -d ml_app uvicorn app:app --host 0.0.0.0 --port 5000
@@ -74,32 +91,8 @@ jobs:
           docker exec -d ml_app uvicorn app1:app --host 0.0.0.0 --port 5001
           sleep 5
 
-      - name: Install ngrok
-        run: |
-            curl -LO https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip
-            unzip ngrok-stable-linux-amd64.zip
-            chmod +x ngrok
-            sudo mv ngrok /usr/local/bin
 
-      - name: Authenticate ngrok
-        run: ngrok authtoken ${{ secrets.cr_2tYOIGuZ3IEmnMLdLr3jl9FTyRE }} 
-
-      - name: Start ngrok on port 5001
-        run: |
-          ngrok http 5001 > ngrok.log &
-          sleep 10 # Allow some time for ngrok to start
-          tail -n 10 ngrok.log
-
-
-
-      # Step 9: Expose app1 with ngrok
-      - name: Expose app1 on port 5001 using ngrok
-        run: |
-          ngrok http 5001 > ngrok.log &
-          sleep 10
-          tail -f ngrok.log
-
-      # Step 10: Upload MLflow Logs
+      # Step 12: Upload MLflow Logs
       - name: Upload MLflow Logs
         uses: actions/upload-artifact@v4
         with:
