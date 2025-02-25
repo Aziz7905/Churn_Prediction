@@ -49,27 +49,26 @@ jobs:
         run: |
           docker build -t my-ml-app .
 
-      # Step 6: Login to Docker Hub (with credentials directly in the file)
+      # Step 6: Login to Docker Hub
       - name: Login to Docker Hub
         run: |
-          echo $Aziz7905 | docker login --$Aziz7905 --password $222JMT4622
+          echo ${{ secrets.DOCKER_PASSWORD }} | docker login --username ${{ secrets.DOCKER_USERNAME }} --password-stdin
 
       # Step 7: Tag Docker Image
       - name: Tag Docker Image
         run: |
-          docker tag my-ml-app $Aziz7905/my-ml-app:latest
+          docker tag my-ml-app ${{ secrets.DOCKER_USERNAME }}/my-ml-app:latest
 
       # Step 8: Push Docker Image to Docker Hub
       - name: Push Docker Image
         run: |
-          docker push $DOCKER_USERNAME/my-ml-app:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/my-ml-app:latest
 
-      # Step 9: Run Docker Container
       - name: Run Docker Container
         run: |
           docker run -d --name ml_app -p 5000:5000 -p 5001:5001 -p 5002:5002 my-ml-app
 
-      # Step 10: Start MLflow Server
+      # Step 9: Start MLflow Server
       - name: Start MLflow Server with SQLite Backend
         run: |
           docker exec -d ml_app mlflow server \
@@ -79,7 +78,7 @@ jobs:
             --port 5002
           sleep 10
 
-      # Step 11: Start FastAPI apps (app.py and app1.py)
+      # Step 10: Start FastAPI apps (app.py and app1.py)
       - name: Start app.py on port 5000
         run: |
           docker exec -d ml_app uvicorn app:app --host 0.0.0.0 --port 5000
