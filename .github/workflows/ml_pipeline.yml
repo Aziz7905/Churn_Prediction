@@ -53,28 +53,20 @@ jobs:
         run: |
           docker run -d --name ml_app -p 5000:5000 -p 5001:5001 -p 5002:5002 my-ml-app
 
-      # Step 6: Start MLflow Server
-      - name: Start MLflow Server with SQLite Backend
+      # Step 6: Start MLflow Server and FastAPI Apps in Parallel
+      - name: Start MLflow Server and FastAPI Apps
         run: |
-          docker exec -d ml_app mlflow server \
-            --backend-store-uri sqlite:///mlflow.db \
-            --default-artifact-root file://$(pwd)/mlruns \
-            --host 0.0.0.0 \
-            --port 5002
+          docker exec -d ml_app sh -c "
+            mlflow server \
+              --backend-store-uri sqlite:///mlflow.db \
+              --default-artifact-root file://$(pwd)/mlruns \
+              --host 0.0.0.0 \
+              --port 5002 & \
+            uvicorn app:app --host 0.0.0.0 --port 5000 & \
+            uvicorn app1:app --host 0.0.0.0 --port 5001"
           sleep 10
 
-      # Step 7: Start FastAPI apps
-      - name: Start app.py on port 5000
-        run: |
-          docker exec -d ml_app uvicorn app:app --host 0.0.0.0 --port 5000
-          sleep 5
-
-      - name: Start app1.py on port 5001
-        run: |
-          docker exec -d ml_app uvicorn app1:app --host 0.0.0.0 --port 5001
-          sleep 5
-
-      # Step 8: Upload MLflow Logs
+      # Step 7: Upload MLflow Logs
       - name: Upload MLflow Logs
         uses: actions/upload-artifact@v4
         with:
