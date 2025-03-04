@@ -7,4 +7,6 @@ mlflow
 fastapi
 uvicorn
 joblib
+elasticsearch
+kibana
 
