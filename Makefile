@@ -1,37 +1,33 @@
-.PHONY: prepare train evaluate clean
+.PHONY: prepare train evaluate clean build run run-api run-frontend
 
-# Variables
-TRAIN_DATA = churn-bigml-80.csv
-TEST_DATA = churn-bigml-20.csv
-OUTPUT = prepared_data.pkl
-MODEL = model.pkl
-IMAGE_NAME=aziz_barkaoui_ds1_mlop
-DOCKER_USER=aziz7905
-PORT=8000
+PYTHON ?= python
+TRAIN_DATA = data/raw/churn-bigml-80.csv
+TEST_DATA = data/raw/churn-bigml-20.csv
+OUTPUT = artifacts/processed/prepared_data.pkl
+MODEL = artifacts/models/churn_model.pkl
+IMAGE_NAME = customer-churn-mlops
+PORT = 8000
 
-# Prepare data: this saves the processed training and test data to pickle files.
 prepare:
-	python3 main.py --mode prepare --train_data $(TRAIN_DATA) --test_data $(TEST_DATA) --output $(OUTPUT)
+	$(PYTHON) train.py --mode prepare --train-data $(TRAIN_DATA) --test-data $(TEST_DATA) --output $(OUTPUT)
 
-# Train model: reads the raw CSVs, processes them, trains the model, and saves it.
 train:
-	python3 main.py --mode train --train_data $(TRAIN_DATA) --test_data $(TEST_DATA) --save $(MODEL)
+	$(PYTHON) train.py --mode train --train-data $(TRAIN_DATA) --test-data $(TEST_DATA) --save $(MODEL)
 
-# Evaluate model: loads the saved model and scaler, processes the test data using the saved scaler, and evaluates.
 evaluate:
-	python3 main.py --mode evaluate --load $(MODEL) --test_data $(TEST_DATA)
+	$(PYTHON) train.py --mode evaluate --test-data $(TEST_DATA) --load $(MODEL)
 
-# Clean: remove generated pickle and model files.
+run-api:
+	uvicorn api:app --reload --host 0.0.0.0 --port 8000
+
+run-frontend:
+	uvicorn frontend:app --reload --host 0.0.0.0 --port 8001
+
 clean:
-	rm -f $(OUTPUT) $(MODEL) *.pkl
+	rm -rf artifacts
 
-# Run all steps
-all: prepare train evaluate
-
-# Construction de l'image
 build:
 	docker build -t $(IMAGE_NAME) .
 
-# Exécution du conteneur
 run:
-	docker run -d -p $(PORT):8000 $(IMAGE_NAME)
+	docker run -d -p $(PORT):8000 -p 8001:8001 -p 5002:5002 $(IMAGE_NAME)

@@ -8,5 +8,4 @@ fastapi
 uvicorn
 joblib
 elasticsearch
-kibana
 
