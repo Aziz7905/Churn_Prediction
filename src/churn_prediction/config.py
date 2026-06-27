@@ -42,7 +42,8 @@ def resolve_path(*candidates: Path) -> Path:
 
 
 def mlflow_tracking_uri() -> str:
-    return os.getenv("MLFLOW_TRACKING_URI", f"file://{MLFLOW_DIR.resolve()}")
+    default_db = (ARTIFACTS_DIR / "mlflow.db").resolve().as_posix()
+    return os.getenv("MLFLOW_TRACKING_URI", f"sqlite:///{default_db}")
 
 
 def churn_api_url() -> str:
@@ -51,4 +52,3 @@ def churn_api_url() -> str:
 
 def elasticsearch_url() -> str:
     return os.getenv("ELASTICSEARCH_URL", "http://localhost:9200")
-

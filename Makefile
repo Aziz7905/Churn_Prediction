@@ -1,6 +1,7 @@
 .PHONY: prepare train evaluate clean build run run-api run-frontend
 
 PYTHON ?= python
+MLFLOW_TRACKING_URI ?= sqlite:///artifacts/mlflow.db
 TRAIN_DATA = data/raw/churn-bigml-80.csv
 TEST_DATA = data/raw/churn-bigml-20.csv
 OUTPUT = artifacts/processed/prepared_data.pkl
@@ -9,13 +10,13 @@ IMAGE_NAME = customer-churn-mlops
 PORT = 8000
 
 prepare:
-	$(PYTHON) run_training.py --mode prepare --train-data $(TRAIN_DATA) --test-data $(TEST_DATA) --output $(OUTPUT)
+	MLFLOW_TRACKING_URI=$(MLFLOW_TRACKING_URI) $(PYTHON) run_training.py --mode prepare --train-data $(TRAIN_DATA) --test-data $(TEST_DATA) --output $(OUTPUT)
 
 train:
-	$(PYTHON) run_training.py --mode train --train-data $(TRAIN_DATA) --test-data $(TEST_DATA) --save $(MODEL)
+	MLFLOW_TRACKING_URI=$(MLFLOW_TRACKING_URI) $(PYTHON) run_training.py --mode train --train-data $(TRAIN_DATA) --test-data $(TEST_DATA) --save $(MODEL)
 
 evaluate:
-	$(PYTHON) run_training.py --mode evaluate --test-data $(TEST_DATA) --load $(MODEL)
+	MLFLOW_TRACKING_URI=$(MLFLOW_TRACKING_URI) $(PYTHON) run_training.py --mode evaluate --test-data $(TEST_DATA) --load $(MODEL)
 
 run-api:
 	uvicorn serve_api:app --reload --host 0.0.0.0 --port 8000

@@ -116,7 +116,7 @@ By default, the frontend runs at `http://localhost:8001`.
 
 ## MLflow
 
-By default, MLflow artifacts are stored locally under `artifacts/mlruns/`.
+By default, MLflow uses a local SQLite tracking database at `artifacts/mlflow.db`.
 
 You can override the tracking backend by setting `MLFLOW_TRACKING_URI` before running training or the API.
 

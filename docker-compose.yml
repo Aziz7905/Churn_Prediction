@@ -9,7 +9,7 @@ services:
     environment:
       - ELASTICSEARCH_URL=http://elasticsearch:9200
       - CHURN_API_URL=http://localhost:8000/predict/
-      - MLFLOW_TRACKING_URI=file:///app/artifacts/mlruns
+      - MLFLOW_TRACKING_URI=sqlite:///app/artifacts/mlflow.db
     volumes:
       - ./artifacts:/app/artifacts
       - ./data:/app/data:ro
@@ -36,4 +36,3 @@ services:
       - "5601:5601"
     depends_on:
       - elasticsearch
-

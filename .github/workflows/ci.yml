@@ -13,6 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       PYTHONPATH: src
+      MLFLOW_TRACKING_URI: sqlite:///artifacts/mlflow.db
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
