@@ -1,4 +1,4 @@
-name: Churn MLOps CI
+name: Customer Churn MLOps CI
 
 on:
   push:
@@ -11,6 +11,8 @@ on:
 jobs:
   validate:
     runs-on: ubuntu-latest
+    env:
+      PYTHONPATH: src
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -38,5 +40,4 @@ jobs:
         run: python tests/test_environment.py
 
       - name: Build Docker image
-        run: docker build -t customer-churn-mlops .
-
+        run: docker build -t churn-prediction-app .

@@ -9,19 +9,19 @@ IMAGE_NAME = customer-churn-mlops
 PORT = 8000
 
 prepare:
-	$(PYTHON) train.py --mode prepare --train-data $(TRAIN_DATA) --test-data $(TEST_DATA) --output $(OUTPUT)
+	$(PYTHON) run_training.py --mode prepare --train-data $(TRAIN_DATA) --test-data $(TEST_DATA) --output $(OUTPUT)
 
 train:
-	$(PYTHON) train.py --mode train --train-data $(TRAIN_DATA) --test-data $(TEST_DATA) --save $(MODEL)
+	$(PYTHON) run_training.py --mode train --train-data $(TRAIN_DATA) --test-data $(TEST_DATA) --save $(MODEL)
 
 evaluate:
-	$(PYTHON) train.py --mode evaluate --test-data $(TEST_DATA) --load $(MODEL)
+	$(PYTHON) run_training.py --mode evaluate --test-data $(TEST_DATA) --load $(MODEL)
 
 run-api:
-	uvicorn api:app --reload --host 0.0.0.0 --port 8000
+	uvicorn serve_api:app --reload --host 0.0.0.0 --port 8000
 
 run-frontend:
-	uvicorn frontend:app --reload --host 0.0.0.0 --port 8001
+	uvicorn serve_web:app --reload --host 0.0.0.0 --port 8001
 
 clean:
 	rm -rf artifacts

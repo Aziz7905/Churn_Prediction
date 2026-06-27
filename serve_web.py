@@ -6,5 +6,4 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
-from churn_prediction.api.main import app  # noqa: E402
-
+from churn_prediction.web.app import app  # noqa: E402

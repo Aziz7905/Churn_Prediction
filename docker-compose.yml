@@ -1,18 +1,35 @@
 services:
+  app:
+    build: .
+    container_name: churn-prediction-app
+    ports:
+      - "8000:8000"
+      - "8001:8001"
+      - "5002:5002"
+    environment:
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+      - CHURN_API_URL=http://localhost:8000/predict/
+      - MLFLOW_TRACKING_URI=file:///app/artifacts/mlruns
+    volumes:
+      - ./artifacts:/app/artifacts
+      - ./data:/app/data:ro
+    depends_on:
+      - elasticsearch
+
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.6.2  # Vérifiée et stable
-    container_name: elasticsearch
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.6.2
+    container_name: churn-elasticsearch
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
     ports:
       - "9200:9200"
       - "9300:9300"
 
   kibana:
-    image: docker.elastic.co/kibana/kibana:8.6.2  # Correspond à Elasticsearch
-    container_name: kibana
+    image: docker.elastic.co/kibana/kibana:8.6.2
+    container_name: churn-kibana
     environment:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
     ports:

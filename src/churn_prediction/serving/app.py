@@ -18,7 +18,7 @@ from churn_prediction.config import (
     mlflow_tracking_uri,
     resolve_path,
 )
-from churn_prediction.pipeline.core import resolve_target_column
+from churn_prediction.training.core import resolve_target_column
 
 logger = logging.getLogger("churn_api")
 logger.setLevel(logging.INFO)
@@ -46,7 +46,7 @@ def _load_bundle():
     prepared_path = resolve_path(DEFAULT_PREPARED_DATA_PATH, LEGACY_PREPARED_DATA_PATH)
     if not model_path.exists() or not prepared_path.exists():
         raise RuntimeError(
-            "Model artifacts are missing. Run `python train.py --mode train` first "
+            "Model artifacts are missing. Run `python run_training.py --mode train` first "
             "or provide existing model.pkl and prepared_data.pkl files."
         )
     model, scaler = joblib.load(model_path)

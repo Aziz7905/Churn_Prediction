@@ -17,7 +17,7 @@ from churn_prediction.config import (
     ensure_directories,
     mlflow_tracking_uri,
 )
-from churn_prediction.pipeline.core import evaluate_model, load_model, prepare_data, resolve_target_column, save_model, train_model
+from churn_prediction.training.core import evaluate_model, load_model, prepare_data, resolve_target_column, save_model, train_model
 
 
 def build_parser() -> argparse.ArgumentParser:
